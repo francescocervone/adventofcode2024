@@ -1,20 +1,41 @@
+import kotlin.math.absoluteValue
+
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.size
+        val leftList = mutableListOf<Int>()
+        val rightList = mutableListOf<Int>()
+        input.forEach { line ->
+            val (left, right) = line.split("   ").map { it.toInt() }
+            leftList += left
+            rightList += right
+        }
+        leftList.sort()
+        rightList.sort()
+        return leftList.foldIndexed(0) { i, totalDistance, _ ->
+            val left = leftList[i]
+            val right = rightList[i]
+            val distance = (right - left).absoluteValue
+            totalDistance + distance
+        }
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        val leftList = mutableListOf<Int>()
+        val occurrences = mutableMapOf<Int, Int>().withDefault { 0 }
+        input.forEach { line ->
+            val (left, right) = line.split("   ").map { it.toInt() }
+            leftList += left
+            occurrences[right] = occurrences.getValue(right) + 1
+        }
+        return leftList.fold(0) { score, value ->
+            score + (occurrences.getValue(value) * value)
+        }
     }
 
-    // Test if implementation meets criteria from the description, like:
-    check(part1(listOf("test_input")) == 1)
-
-    // Or read a large test input from the `src/Day01_test.txt` file:
     val testInput = readInput("Day01_test")
-    check(part1(testInput) == 1)
+    part1(testInput).println()
+    part2(testInput).println()
 
-    // Read the input from the `src/Day01.txt` file.
     val input = readInput("Day01")
     part1(input).println()
     part2(input).println()
