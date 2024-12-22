@@ -34,7 +34,7 @@ fun main() {
         return false
     }
 
-    fun findNumPadShortestPaths(): Map<Route, Set<List<Day21Actions>>> {
+    fun findNumPadShortestPaths(): Map<Route, Set<String>> {
         val keys = Array(4) { Array(3) { ' ' } }
         keys[0][0] = '7'
         keys[0][1] = '8'
@@ -47,35 +47,35 @@ fun main() {
         keys[2][2] = '3'
         keys[3][1] = '0'
         keys[3][2] = 'A'
-        val paths = mutableMapOf<Route, Set<List<Day21Actions>>>()
+        val paths = mutableMapOf<Route, Set<String>>()
         for (i in 0..3) {
             for (j in 0..2) {
                 if (isNumPadIllegalSpot(Location(i, j))) continue
                 val from = keys[i][j]
-                val queue = LinkedList<Pair<Location, List<Day21Actions>>>()
-                queue.add(Location(i, j) to emptyList())
-                val enqueued = mutableMapOf<Location, Set<List<Day21Actions>>>(Location(i, j) to setOf(emptyList()))
+                val queue = LinkedList<Pair<Location, String>>()
+                queue.add(Location(i, j) to "")
+                val enqueued = mutableMapOf(Location(i, j) to setOf(""))
                 while (queue.isNotEmpty()) {
                     val (location, path) = queue.removeFirst()
                     val to = keys[location.i][location.j]
                     val existingPaths = paths.getOrPut(Route(from, to)) { emptySet() }
                     paths[Route(from, to)] = existingPaths.toMutableSet().apply { add(path) }
                     listOf(
-                        location.copy(j = location.j - 1) to path + Day21Actions.Left,
-                        location.copy(j = location.j + 1) to path + Day21Actions.Right,
-                        location.copy(i = location.i - 1) to path + Day21Actions.Up,
-                        location.copy(i = location.i + 1) to path + Day21Actions.Down,
+                        location.copy(j = location.j - 1) to path + Day21Actions.Left.char,
+                        location.copy(j = location.j + 1) to path + Day21Actions.Right.char,
+                        location.copy(i = location.i - 1) to path + Day21Actions.Up.char,
+                        location.copy(i = location.i + 1) to path + Day21Actions.Down.char,
                     )
                         .asSequence()
                         .filter {
-                            val size = (enqueued[it.first] ?: emptySet()).firstOrNull()?.size
+                            val size = (enqueued[it.first] ?: emptySet()).firstOrNull()?.length
                             if (size == null) true
-                            else it.second.size <= size
+                            else it.second.length <= size
                         }
                         .filter { it.second !in (enqueued[it.first] ?: emptySet()) }
                         .filter { !isNumPadIllegalSpot(it.first) }
                         .onEach {
-                            enqueued[it.first] = (enqueued[it.first] ?: emptySet()).plus<List<Day21Actions>>(it.second)
+                            enqueued[it.first] = (enqueued[it.first] ?: emptySet()) + it.second
                         }
                         .onEach { queue += it }
                         .toList()
@@ -85,41 +85,41 @@ fun main() {
         return paths
     }
 
-    fun findDirPadShortestPaths(): Map<Route, Set<List<Day21Actions>>> {
+    fun findDirPadShortestPaths(): Map<Route, Set<String>> {
         val keys = Array(2) { Array(3) { ' ' } }
         keys[0][1] = '^'
         keys[0][2] = 'A'
         keys[1][0] = '<'
         keys[1][1] = 'v'
         keys[1][2] = '>'
-        val paths = mutableMapOf<Route, Set<List<Day21Actions>>>()
+        val paths = mutableMapOf<Route, Set<String>>()
         for (i in 0..2) {
             for (j in 0..3) {
                 if (isDirPadIllegalSpot(Location(i, j))) continue
                 val from = keys[i][j]
-                val queue = LinkedList<Pair<Location, List<Day21Actions>>>()
-                queue.add(Location(i, j) to emptyList())
-                val enqueued = mutableMapOf<Location, Set<List<Day21Actions>>>(Location(i, j) to setOf(emptyList()))
+                val queue = LinkedList<Pair<Location, String>>()
+                queue.add(Location(i, j) to "")
+                val enqueued = mutableMapOf(Location(i, j) to setOf(""))
                 while (queue.isNotEmpty()) {
                     val (location, path) = queue.removeFirst()
                     val to = keys[location.i][location.j]
                     val existingPaths = paths.getOrPut(Route(from, to)) { emptySet() }
                     paths[Route(from, to)] = existingPaths.toMutableSet().apply { add(path) }
                     listOf(
-                        location.copy(j = location.j - 1) to path + Day21Actions.Left,
-                        location.copy(j = location.j + 1) to path + Day21Actions.Right,
-                        location.copy(i = location.i - 1) to path + Day21Actions.Up,
-                        location.copy(i = location.i + 1) to path + Day21Actions.Down,
+                        location.copy(j = location.j - 1) to path + Day21Actions.Left.char,
+                        location.copy(j = location.j + 1) to path + Day21Actions.Right.char,
+                        location.copy(i = location.i - 1) to path + Day21Actions.Up.char,
+                        location.copy(i = location.i + 1) to path + Day21Actions.Down.char,
                     ).asSequence()
                         .filter {
-                            val size = (enqueued[it.first] ?: emptySet()).firstOrNull()?.size
+                            val size = (enqueued[it.first] ?: emptySet()).firstOrNull()?.length
                             if (size == null) true
-                            else it.second.size <= size
+                            else it.second.length <= size
                         }
                         .filter { it.second !in (enqueued[it.first] ?: emptySet()) }
                         .filter { !isDirPadIllegalSpot(it.first) }
                         .onEach {
-                            enqueued[it.first] = (enqueued[it.first] ?: emptySet()).plus<List<Day21Actions>>(it.second)
+                            enqueued[it.first] = (enqueued[it.first] ?: emptySet()) + it.second
                         }
                         .onEach { queue += it }
                         .toList()
@@ -130,47 +130,50 @@ fun main() {
     }
 
     fun findPaths(
-        from: Char,
-        sequence: String,
-        paths: Map<Route, Set<List<Day21Actions>>>,
-    ): List<List<Day21Actions>> {
-        if (sequence.isEmpty()) {
-            return listOf(emptyList())
-        }
-        val to = sequence.first()
-        val routePaths = paths[Route(from, to)]!!
-        return routePaths.flatMap { path ->
-            val nextSequence = sequence.substring(1)
-            findPaths(to, nextSequence, paths).map { subpath ->
-                path + Day21Actions.Push + subpath
+        startingSequence: String,
+        paths: Map<Route, Set<String>>,
+    ): List<String> {
+        data class Iteration(
+            val from: Char,
+            val sequence: String,
+        )
+
+        var recordedPaths = listOf("")
+        val queue = LinkedList<Iteration>()
+        queue.add(Iteration('A', startingSequence))
+        while (queue.isNotEmpty()) {
+            val (from, sequence) = queue.removeFirst()
+            val to = sequence.first()
+            val routePaths = paths[Route(from, to)]!!
+            recordedPaths = recordedPaths.flatMap { path ->
+                routePaths.map { subpath ->
+                    path + subpath + Day21Actions.Push.char
+                }
+            }
+            if (sequence.length > 1) {
+                queue.add(Iteration(to, sequence.substring(1)))
             }
         }
+        return recordedPaths
     }
 
     fun part1(input: List<String>): Long {
         val numPadShortestPaths = findNumPadShortestPaths()
         val dirPadShortestPaths = findDirPadShortestPaths()
         return input.sumOf { sequence ->
-            val numPadSequences: List<String> = findPaths(
-                from = 'A',
-                sequence = sequence,
+            var sequences: List<String> = findPaths(
+                startingSequence = sequence,
                 paths = numPadShortestPaths,
-            ).map { path -> path.map { it.char }.joinToString(separator = "") }
-            val dirPadSequences1: List<String> = numPadSequences.flatMap { numPadSequence ->
-                findPaths(
-                    from = 'A',
-                    sequence = numPadSequence,
-                    paths = dirPadShortestPaths,
-                ).map { path -> path.map { it.char }.joinToString(separator = "") }
+            )
+            repeat(2) {
+                sequences = sequences.flatMap { sequence ->
+                    findPaths(
+                        startingSequence = sequence,
+                        paths = dirPadShortestPaths,
+                    )
+                }
             }
-            val dirPadSequences2: List<String> = dirPadSequences1.flatMap { dirPadSequence1 ->
-                findPaths(
-                    from = 'A',
-                    sequence = dirPadSequence1,
-                    paths = dirPadShortestPaths,
-                ).map { path -> path.map { it.char }.joinToString(separator = "") }
-            }
-            dirPadSequences2.minOf { it.length } * sequence.substringBefore('A').toInt()
+            sequences.minOf { it.length } * sequence.substringBefore('A').toInt()
         }.toLong()
     }
 
